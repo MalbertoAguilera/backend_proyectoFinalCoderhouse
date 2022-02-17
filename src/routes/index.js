@@ -2,9 +2,20 @@ const express = require('express');
 const passport = require('passport');
 const router = express.Router();
 const {transporter, mailOptions} = require('../nodeMailer/config');
+const {client, options} = require('../twilio/config');
 
 router.get('/',(req, res, next) => {
       res.render('index');
+})
+
+router.post('/twilio', async (req, res) => {
+      try {
+            let info = await client.messages.create(options);
+            console.log(info);
+            res.send({data:info})
+      } catch (error) {
+            console.log(error);
+      }
 })
 
 router.post('/nodemailer', async (req, res) => {
