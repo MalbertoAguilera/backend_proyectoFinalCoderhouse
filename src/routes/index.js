@@ -1,10 +1,23 @@
 const express = require('express');
 const passport = require('passport');
 const router = express.Router();
+const {transporter, mailOptions} = require('../nodeMailer/config');
 
-router.get('/', (req, res, next) => {
+router.get('/',(req, res, next) => {
       res.render('index');
 })
+
+router.post('/nodemailer', async (req, res) => {
+      try {
+            let info = await transporter.sendMail(mailOptions)
+            console.log(info);
+            res.send(`email enviado a ${mailOptions.to}`)
+      } catch (error) {
+            console.log(error);
+      }
+})
+
+
 
 router.get('/signup', (req, res, next) => {
       res.render('signup');
