@@ -5,11 +5,13 @@ const morgan = require('morgan');
 const passport = require('passport');
 const session = require('express-session');
 const flash = require('connect-flash');
-//routes
-const routesLogin = require('./routes/index')
+const routerAuth = require('./routes/routerAuth')
+const routerProducts = require('./routes/routerProducts')
+const routerCart = require('./routes/routerCart')
 
 //initializations
 const app = express();
+const PORT = 3000 || process.env.PORT;
 require('./database');
 require('./passport/local-auth');
 
@@ -17,8 +19,6 @@ require('./passport/local-auth');
 app.set('views', path.join(__dirname, 'views'));
 app.engine('ejs', engine);
 app.set('view engine', 'ejs');
-app.set('port', 3000 || process.env.PORT);
-
 
 //middlewares
 app.use(morgan('dev'));
@@ -31,6 +31,7 @@ app.use(session({
 app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
+
 //evalua si hay un mensaje desde la ruta signup
 app.use((req,res,next) => {
       app.locals.signupMessage = req.flash('signupMessage');
@@ -40,9 +41,19 @@ app.use((req,res,next) => {
 })
 
 //Routes
-app.use(routesLogin)
+app.use(routerAuth);
+app.use("/api/productos", routerProducts);
+// app.use("/api/carrito", routerCart);
+app.use(function (req, res, next) {
+      res.status(404).json({
+        error: -2,
+        descripcion: `Ruta ${req.url}, metodo ${req.method} no implementada`
+      });
+    });
 
 //starting the server
-app.listen(app.get('port'), () => {
-      console.log('Server on port', app.get('port'));
-})
+const server = app.listen(PORT, () => {
+      console.log(`El servidor se encuentra escuchando por el puerto ${server.address().port}`)
+});
+
+server.on("error", error => console.log(`Error en servidor ${error}`));

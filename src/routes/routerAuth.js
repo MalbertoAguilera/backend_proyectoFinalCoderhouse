@@ -3,6 +3,8 @@ const passport = require('passport');
 const router = express.Router();
 const {transporter, mailOptions} = require('../nodeMailer/config');
 const {client, options} = require('../twilio/config');
+const isAuthenticated = require('../auth/objectAuth');
+
 
 router.get('/',(req, res, next) => {
       res.render('index');
@@ -29,7 +31,6 @@ router.post('/nodemailer', async (req, res) => {
 })
 
 
-
 router.get('/signup', (req, res, next) => {
       res.render('signup');
 })
@@ -51,22 +52,20 @@ router.post('/signin', passport.authenticate('local-signin',{
       passReqToCallback:true
 }))
 
+//MIDDLEWARE DE USUARIOS AUTENTICADOS
+//DE ACA EN ADELANTE SOLO ACCEDEN SI ESTAN LOGUEADOS
+router.use((req, res, next) => {
+      isAuthenticated(req, res, next);
+})
+
+router.get('/profile', (req, res, next) => {
+      console.log("llegue a profile---------------");
+      res.render('profile');
+})
+
 router.get('/logout', (req, res, next) => {
       req.logOut();
       res.redirect('/');
 })
-
-function isAuthenticated (req, res, next) {
-      if(req.isAuthenticated()){
-            return next();
-      }
-      res.redirect('/');
-}
-
-router.get('/profile', isAuthenticated, (req, res, next) => {
-      res.render('profile');
-})
-
-
 
 module.exports = router;
