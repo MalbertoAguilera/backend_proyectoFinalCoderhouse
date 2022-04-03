@@ -21,13 +21,24 @@ passport.use(
       passReqToCallback: true,
     },
     async (req, email, password, done) => {
+      //express validator
+      req.checkBody("email", "invalid email").notEmpty().isEmail();
+      req.checkBody("password", "invalid PASSWORD").notEmpty().isLength({min:4});
+      var errors = req.validationErrors();
+      if (errors) {
+        const messages = [];
+        console.log(errors);
+        errors.forEach((error) => {
+          messages.push(error.msg);
+        });
+        console.log(messages);
+        return done(null, false, req.flash("error", messages));
+      }
       const user = await User.findOne({ email: email });
       if (user) {
-        return done(
-          null,
-          false,
-          {message:'El email ya se encuentra registrado'}
-        );
+        return done(null, false, {
+          message: "El email ya se encuentra registrado",
+        });
       } else {
         const newUser = new User();
         newUser.email = email;
