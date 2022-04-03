@@ -59,7 +59,6 @@ router.use((req, res, next) => {
 })
 
 router.get('/profile', (req, res, next) => {
-      console.log("llegue a profile---------------");
       res.render('profile');
 })
 
