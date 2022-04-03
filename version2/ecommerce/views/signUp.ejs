@@ -6,6 +6,13 @@
                   <div class="card-header">
                         <h3>SIGN UP</h3>
                   </div>
+                  <% if(hasErrors){ %>
+                  <div class="alert alert-danger">
+                        <% messages.forEach(function(message) { %>
+                              <p><%= message%></p>
+                        <% }); %>
+                  </div>
+                  <% } %>
                   <div class="card-body">
                         <form action="/user/signup" method="POST">
                               <div class="form-group">

@@ -7,11 +7,11 @@ const schema = new Schema({
   password: { type: String, required: true },
 });
 
-userSchema.methods.encryptPassword = (password) => {
+schema.methods.encryptPassword = (password) => {
   return bcrypt.hashSync(password, bcrypt.genSaltSync(10));
 };
 
-userSchema.methods.comparePassword = function (password) {
+schema.methods.comparePassword = function (password) {
   return bcrypt.compareSync(password, this.password);
 };
 
