@@ -36,6 +36,25 @@ router.post(
   })
 );
 
+router.get("/user/signin", async (req, res, next) => {
+  const messages = req.flash("error");
+  res.render("signIn", {
+    csurfToken: req.csrfToken(),
+    title: "SignIn",
+    messages: messages,
+    hasErrors: messages.length > 0,
+  });
+});
+
+router.post(
+  "/user/signin",
+  passport.authenticate("local-signIn", {
+    successRedirect: "/profile",
+    failureRedirect: "/user/signin",
+    failureFlash: true,
+  })
+);
+
 router.get("/profile", (req, res, next) => {
   res.render("profile", { title: "Profile" });
 });
