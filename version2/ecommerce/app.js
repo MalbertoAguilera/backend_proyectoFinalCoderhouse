@@ -8,6 +8,7 @@ const session = require("express-session");
 const passport = require("passport");
 const flash = require("connect-flash");
 const expressValidator = require("express-validator");
+const MongoStore = require("connect-mongo");
 
 const userRoutes = require("./routes/user");
 var indexRouter = require("./routes/index");
@@ -38,16 +39,22 @@ app.use(
     secret: "mi super secreto",
     resave: false,
     saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl:
+        "mongodb+srv://matias:atlas1234@sessionatlas.jvq29.mongodb.net/backendProyectoFinal2?retryWrites=true&w=majority",
+    }),
+    cookie: { maxAge: 60 * 60 * 1000 },
   })
 );
 app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
-//session
+//middlewares dependientes de session
 
-//middleware para cambiar vista del nav
+//middleware para cambiar vista del nav al estar autorizado
 app.use((req, res, next) => {
   res.locals.isLogged = req.isAuthenticated();
+  res.locals.session = req.session;
   next();
 });
 
