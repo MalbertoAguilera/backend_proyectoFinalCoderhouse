@@ -54,7 +54,15 @@ app.use(passport.session());
 //middleware para cambiar vista del nav al estar autorizado
 app.use((req, res, next) => {
   res.locals.isLogged = req.isAuthenticated();
-  res.locals.session = req.session;
+
+  //comprobacion par el badge del view NAV para solucionar exigencia del EJS
+  //al pedir que session.cart.totalQty exista para renderizar en la vista
+  if (!req.session.cart) {
+    res.locals.session = req.session;
+    res.locals.session.cart = {totalQty:undefined};
+  } else {
+    res.locals.session = req.session;
+  }
   next();
 });
 
