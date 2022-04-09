@@ -4,6 +4,7 @@ const Product = require("../models/schema/product");
 const Cart = require("../models/schema/cart");
 const Order = require("../models/schema/order");
 const arrayOfArray = require("../utils/arrayOfArray");
+const { mustSignIn } = require("../utils/auth");
 const csurf = require("csurf");
 
 const csurfProtection = csurf();
@@ -52,7 +53,7 @@ router.get("/shopping-cart", (req, res, next) => {
   });
 });
 
-router.get("/checkout", async (req, res, next) => {
+router.get("/checkout", mustSignIn, async (req, res, next) => {
   const cart = new Cart(req.session.cart);
   const order = new Order({
     user: req.user,
@@ -62,9 +63,8 @@ router.get("/checkout", async (req, res, next) => {
 
   try {
     await order.save();
-    req.flash("success", "Succesfully bought products");
+    req.flash("success", "Compra realizada de forma exitosa");
     req.session.cart = null;
-    console.log(req.session.cart);
     res.redirect("/");
   } catch (error) {
     console.log(error);

@@ -32,16 +32,14 @@ passport.use(
 
       if (errors) {
         const messages = [];
-        console.log(errors);
         errors.forEach((error) => {
           messages.push(error.msg);
         });
         console.log(messages);
         return done(null, false, req.flash("error", messages));
       }
-      //express validator
+
       const user = await User.findOne({ email: email });
-      //express validator
       req.checkBody("email", "invalid email").notEmpty();
       req.checkBody("password", "invalid PASSWORD").notEmpty();
       var errors = req.validationErrors();
