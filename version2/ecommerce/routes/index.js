@@ -1,24 +1,24 @@
 var express = require("express");
 var router = express.Router();
 const Product = require("../models/schema/product");
-const arrayOfArray = require("../utils/arrayOfArray");
 const Cart = require("../models/schema/cart");
+const Order = require("../models/schema/order");
+const arrayOfArray = require("../utils/arrayOfArray");
 const csurf = require("csurf");
 
 const csurfProtection = csurf();
 router.use(csurfProtection);
 
 router.get("/", async (req, res, next) => {
-  const successMsg = req.flash('success')[0];
+  const successMsg = req.flash("success")[0];
   const products = await Product.find();
   const threeProductsPerPosition = arrayOfArray(products);
-  console.log(successMsg);
-  console.log(!successMsg);
+
   res.render("shop", {
     products: threeProductsPerPosition,
     title: "Shopping Cart",
     successMsg: successMsg,
-    noMsg: !successMsg
+    noMsg: !successMsg,
   });
 });
 
@@ -38,7 +38,10 @@ router.get("/add-to-cart/:id", async (req, res, next) => {
 
 router.get("/shopping-cart", (req, res, next) => {
   if (!req.session.cart.items) {
-    return res.render("shoppingCart", { products: null, title: "Cart" });
+    return res.render("shoppingCart", {
+      products: null,
+      title: "Cart",
+    });
   }
 
   const cart = new Cart(req.session.cart);
@@ -49,11 +52,23 @@ router.get("/shopping-cart", (req, res, next) => {
   });
 });
 
-router.get("/checkout", (req, res, next) => {
-  req.flash('success', "Succesfully bought products");
-  req.session.cart = null
-  console.log(req.session.cart);
-  res.redirect('/');
+router.get("/checkout", async (req, res, next) => {
+  const cart = new Cart(req.session.cart);
+  const order = new Order({
+    user: req.user,
+    email: req.user.email,
+    cart,
+  });
+
+  try {
+    await order.save();
+    req.flash("success", "Succesfully bought products");
+    req.session.cart = null;
+    console.log(req.session.cart);
+    res.redirect("/");
+  } catch (error) {
+    console.log(error);
+  }
 });
 
 module.exports = router;
