@@ -59,6 +59,7 @@ router.get("/checkout", mustSignIn, async (req, res, next) => {
     user: req.user,
     email: req.user.email,
     cart,
+    cartToArray:cart.generateArray()
   });
 
   try {

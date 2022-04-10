@@ -7,15 +7,45 @@ const {
 } = require("../utils/auth");
 const passport = require("passport");
 const csurf = require("csurf");
+const Order = require("../models/schema/order");
+const Cart = require("../models/schema/cart");
 
 const csurfProtection = csurf();
 router.use(csurfProtection);
 
 //ruta protegida
-router.get("/profile", isLoggedIn, (req, res, next) => {
-  res.render("profile", {
-    title: "Profile",
-  });
+// router.get("/profile", isLoggedIn, async (req, res, next) => {
+//   Order.find({user:req.user}, (err,orders)=>{
+//     if(err){
+//       return res.write('error')
+//     }
+  
+//     let cart;
+//     orders.forEach(order => {
+//       cart = new Cart(order.cart);
+//       //genera una nueva propiedad dentro del objeto de la orden
+//       order.items = cart.generateArray()
+//     });
+
+//     //PERO NO AGREGA LA PROPIEDAD!!!!!!!!
+//     console.log("-------------");
+//     console.log(orders)
+//     console.log("-------------");
+
+//     res.json({msg:"accedi a profile"})
+//     // res.render('profile',{title:'profile', orders})
+//   })
+// });
+
+router.get("/profile", isLoggedIn, async (req, res, next) => {
+  try {
+    const orders = await Order.find({user:req.user})
+    console.log(orders);
+    res.render('profile',{title:'profile', orders})
+  } catch (error) {
+    console.log(error);
+  }
+  
 });
 
 router.get("/logout", isLoggedIn, (req, res, next) => {
