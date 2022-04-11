@@ -8,4 +8,4 @@ const schema = new Schema({
   cartToArray: { type: Object }
 });
 
-module.exports = mongoose.model("order", schema);
+module.exports = mongoose.model("Order", schema);

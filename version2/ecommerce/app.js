@@ -9,18 +9,16 @@ const passport = require("passport");
 const flash = require("connect-flash");
 const expressValidator = require("express-validator");
 const MongoStore = require("connect-mongo");
+const { mongoDB } = require("./config/keys");
 
 const userRoutes = require("./routes/user");
-var indexRouter = require("./routes/index");
+const adminRoutes = require("./routes/admin");
+const indexRouter = require("./routes/index");
 
 var app = express();
 
 //conexion a la base de datos
-mongoose
-  .connect(
-    "mongodb+srv://matias:atlas1234@sessionatlas.jvq29.mongodb.net/backendProyectoFinal2?retryWrites=true&w=majority"
-  )
-  .then((db) => console.log("Database connected"));
+mongoose.connect(mongoDB.URL).then((db) => console.log("Database connected"));
 require("./config/passport");
 
 // view engine setup
@@ -39,10 +37,7 @@ app.use(
     secret: "mi super secreto",
     resave: false,
     saveUninitialized: false,
-    store: MongoStore.create({
-      mongoUrl:
-        "mongodb+srv://matias:atlas1234@sessionatlas.jvq29.mongodb.net/backendProyectoFinal2?retryWrites=true&w=majority",
-    }),
+    store: MongoStore.create({ mongoUrl: mongoDB.URL }),
     cookie: { maxAge: 60 * 60 * 1000 },
   })
 );
@@ -59,7 +54,7 @@ app.use((req, res, next) => {
   //al pedir que session.cart.totalQty exista para renderizar en la vista
   if (!req.session.cart) {
     res.locals.session = req.session;
-    res.locals.session.cart = {totalQty:undefined};
+    res.locals.session.cart = { totalQty: undefined };
   } else {
     res.locals.session = req.session;
   }
@@ -68,6 +63,7 @@ app.use((req, res, next) => {
 
 //routes
 app.use("/user", userRoutes);
+app.use("/admin", adminRoutes);
 app.use("/", indexRouter);
 
 // // catch 404 and forward to error handler

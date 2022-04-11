@@ -4,11 +4,12 @@ const {
   isLoggedIn,
   isNotLoggedIn,
   successCheckoutRedirect,
+  successAdminRedirect,
 } = require("../utils/auth");
 const passport = require("passport");
 const csurf = require("csurf");
-const Order = require("../models/schema/order");
-const Cart = require("../models/schema/cart");
+const Order = require("../models/schema/Order");
+const Cart = require("../models/schema/Cart");
 
 const csurfProtection = csurf();
 router.use(csurfProtection);
@@ -19,7 +20,7 @@ router.use(csurfProtection);
 //     if(err){
 //       return res.write('error')
 //     }
-  
+
 //     let cart;
 //     orders.forEach(order => {
 //       cart = new Cart(order.cart);
@@ -39,13 +40,11 @@ router.use(csurfProtection);
 
 router.get("/profile", isLoggedIn, async (req, res, next) => {
   try {
-    const orders = await Order.find({user:req.user})
-    console.log(orders);
-    res.render('profile',{title:'profile', orders})
+    const orders = await Order.find({ user: req.user });
+    res.render("profile", { title: "profile", orders });
   } catch (error) {
     console.log(error);
   }
-  
 });
 
 router.get("/logout", isLoggedIn, (req, res, next) => {
@@ -96,6 +95,7 @@ router.post(
     failureRedirect: "/user/signin",
     failureFlash: true,
   }),
+  successAdminRedirect,
   successCheckoutRedirect
 );
 

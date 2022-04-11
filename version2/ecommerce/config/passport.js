@@ -2,6 +2,7 @@ const { Passport } = require("passport");
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
 const User = require("../models/schema/user");
+const { sendMailNewUser } = require("../utils/sendMail");
 
 passport.serializeUser((user, done) => {
   done(null, user.id);
@@ -35,7 +36,6 @@ passport.use(
         errors.forEach((error) => {
           messages.push(error.msg);
         });
-        console.log(messages);
         return done(null, false, req.flash("error", messages));
       }
 
@@ -62,6 +62,8 @@ passport.use(
         const newUser = new User();
         newUser.email = email;
         newUser.password = newUser.encryptPassword(password);
+        newUser.role = "user";
+        sendMailNewUser(newUser);
         await newUser.save();
         done(null, newUser);
       }

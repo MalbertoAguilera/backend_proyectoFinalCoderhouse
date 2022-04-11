@@ -5,6 +5,7 @@ const isLoggedIn = (req, res, next) => {
   res.redirect("/");
 };
 
+
 const isNotLoggedIn = (req, res, next) => {
   if (!req.isAuthenticated()) {
     return next();
@@ -33,4 +34,12 @@ const successCheckoutRedirect = (req, res, next) => {
   }
 };
 
-module.exports = { isLoggedIn, isNotLoggedIn, mustSignIn, successCheckoutRedirect };
+const successAdminRedirect = (req, res, next) => {
+  console.log(req.user.role === "admin");
+  if (req.user.role === "admin") {
+    return res.redirect('/admin/listar-productos');
+  }
+  next();
+};
+
+module.exports = { isLoggedIn, isNotLoggedIn, mustSignIn, successCheckoutRedirect, successAdminRedirect };

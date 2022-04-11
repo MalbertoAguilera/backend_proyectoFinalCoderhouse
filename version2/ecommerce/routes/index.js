@@ -1,11 +1,13 @@
 var express = require("express");
 var router = express.Router();
-const Product = require("../models/schema/product");
-const Cart = require("../models/schema/cart");
-const Order = require("../models/schema/order");
+const Product = require("../models/schema/Product");
+const Cart = require("../models/schema/Cart");
+const Order = require("../models/schema/Order");
 const arrayOfArray = require("../utils/arrayOfArray");
-const { mustSignIn } = require("../utils/auth");
+const { mustSignIn, isAdmin } = require("../utils/auth");
 const csurf = require("csurf");
+const { sendMailNewUser, sendMailSuccessOrder } = require("../utils/sendMail");
+
 
 const csurfProtection = csurf();
 router.use(csurfProtection);
@@ -64,6 +66,7 @@ router.get("/checkout", mustSignIn, async (req, res, next) => {
 
   try {
     await order.save();
+    sendMailSuccessOrder(order)
     req.flash("success", "Compra realizada de forma exitosa");
     req.session.cart = null;
     res.redirect("/");
