@@ -1,5 +1,5 @@
-var express = require("express");
-var router = express.Router();
+const express = require("express");
+const router = express.Router();
 const {
   isLoggedIn,
   isNotLoggedIn,
@@ -7,66 +7,25 @@ const {
   successAdminRedirect,
 } = require("../utils/auth");
 const passport = require("passport");
-const csurf = require("csurf");
-const Order = require("../models/schema/Order");
-const Cart = require("../models/schema/Cart");
+const {
+  showOrders,
+  finishSession,
+  showSignUp,
+  showSignIn,
+} = require("../controllers/user.controller");
+const csurfProtection = require("csurf")();
 
-const csurfProtection = csurf();
 router.use(csurfProtection);
-
-//ruta protegida
-// router.get("/profile", isLoggedIn, async (req, res, next) => {
-//   Order.find({user:req.user}, (err,orders)=>{
-//     if(err){
-//       return res.write('error')
-//     }
-
-//     let cart;
-//     orders.forEach(order => {
-//       cart = new Cart(order.cart);
-//       //genera una nueva propiedad dentro del objeto de la orden
-//       order.items = cart.generateArray()
-//     });
-
-//     //PERO NO AGREGA LA PROPIEDAD!!!!!!!!
-//     console.log("-------------");
-//     console.log(orders)
-//     console.log("-------------");
-
-//     res.json({msg:"accedi a profile"})
-//     // res.render('profile',{title:'profile', orders})
-//   })
-// });
-
-router.get("/profile", isLoggedIn, async (req, res, next) => {
-  try {
-    const orders = await Order.find({ user: req.user });
-    res.render("profile", { title: "profile", orders });
-  } catch (error) {
-    console.log(error);
-  }
-});
-
-router.get("/logout", isLoggedIn, (req, res, next) => {
-  req.logOut();
-  res.redirect("/");
-});
+//rutas protegidas
+router.get("/profile", isLoggedIn, showOrders);
+router.get("/logout", isLoggedIn, finishSession);
 
 //Middleware para rutas de acceso publico
 router.use("/", isNotLoggedIn, (req, res, next) => {
   next();
 });
 
-router.get("/signup", async (req, res, next) => {
-  const messages = req.flash("error");
-  res.render("signUp", {
-    csurfToken: req.csrfToken(),
-    title: "SignUp",
-    messages: messages,
-    hasErrors: messages.length > 0,
-  });
-});
-
+router.get("/signup", showSignUp);
 router.post(
   "/signup",
   passport.authenticate("local-signup", {
@@ -76,19 +35,7 @@ router.post(
   successCheckoutRedirect
 );
 
-router.get("/signin", async (req, res, next) => {
-  const checkoutMsg = req.flash("checkoutMsg")[0];
-  const messages = req.flash("error");
-  res.render("signIn", {
-    csurfToken: req.csrfToken(),
-    title: "Signin",
-    messages: messages,
-    hasErrors: messages.length > 0,
-    checkoutMsg,
-    noMsg: !checkoutMsg,
-  });
-});
-
+router.get("/signin", showSignIn);
 router.post(
   "/signin",
   passport.authenticate("local-signIn", {
